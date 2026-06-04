@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Desafío de pronóstico Mundial 2026 — Groovinads</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; min-height: 100vh; padding: 16px; position: relative; background: #070d35; }
+  body::before { content:''; position:fixed; inset:0; z-index:0; overflow:hidden; }
+  .pitch-bg { position:fixed; inset:0; z-index:0; overflow:hidden; }
+  .container { position:relative; z-index:1; max-width:680px; margin:0 auto; }
+  :root { --groov-dark:#1a1460; --groov-mid:#2d27a0; --groov-cyan:#00c9f0; --groov-grad:linear-gradient(135deg,#1a1460,#3a5bd9,#00c9f0); }
+  .header { background:var(--groov-grad); border-radius:12px; padding:20px 24px 16px; margin-bottom:16px; display:flex; align-items:center; gap:16px; }
+  .logo-text { font-size:22px; font-weight:500; color:white; letter-spacing:-0.5px; }
+  .logo-text span { color:var(--groov-cyan); }
+  .tagline { font-size:12px; color:rgba(255,255,255,0.7); margin-top:2px; }
+  .header-right { margin-left:auto; text-align:right; }
+  .header-right .title { font-size:14px; font-weight:500; color:white; }
+  .header-right .sub { font-size:12px; color:rgba(255,255,255,0.65); margin-top:2px; }
+  .nav { display:flex; gap:6px; margin-bottom:16px; flex-wrap:wrap; }
+  .nav button { padding:7px 16px; border-radius:20px; border:1px solid rgba(0,0,0,0.15); background:rgba(255,255,255,0.92); color:#555; font-size:13px; cursor:pointer; transition:all 0.15s; }
+  .nav button.active { background:var(--groov-dark); color:white; border-color:var(--groov-dark); font-weight:500; }
+  .section { display:none; }
+  .section.visible { display:block; }
+  .card { background:rgba(255,255,255,0.97); border:1px solid rgba(0,0,0,0.08); border-radius:12px; padding:16px 20px; margin-bottom:12px; }
+  .card-title { font-size:12px; font-weight:500; color:#888; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:12px; }
+  .form-group { margin-bottom:12px; }
+  .form-group label { font-size:13px; color:#666; display:block; margin-bottom:4px; }
+  .form-group input { width:100%; padding:10px 12px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font-size:14px; color:#111; background:white; outline:none; transition:border-color 0.15s; }
+  .form-group input:focus { border-color:var(--groov-mid); }
+  .btn-primary { background:var(--groov-mid); color:white; border:none; border-radius:8px; padding:11px 20px; font-size:14px; font-weight:500; cursor:pointer; width:100%; transition:opacity 0.15s; }
+  .btn-primary:hover { opacity:0.88; }
+  .btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-secondary { background:#f0f0f0; color:#333; border:none; border-radius:8px; padding:11px 20px; font-size:14px; font-weight:500; cursor:pointer; width:100%; margin-top:8px; }
+  .match-card { background:rgba(255,255,255,0.97); border:1px solid rgba(0,0,0,0.08); border-radius:12px; padding:14px 16px; margin-bottom:8px; }
+  .match-header { font-size:12px; color:#555; font-weight:500; margin-bottom:6px; }
+  .match-times { font-size:11px; color:#888; line-height:1.9; margin-bottom:10px; }
+  .match-teams { display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:8px; }
+  .team { display:flex; flex-direction:column; align-items:flex-end; gap:4px; }
+  .team.away { align-items:flex-start; }
+  .team-flag { width:36px; height:27px; border-radius:3px; object-fit:cover; border:1px solid rgba(0,0,0,0.08); }
+  .team-name { font-size:13px; font-weight:500; color:#111; text-align:right; }
+  .team.away .team-name { text-align:left; }
+  .score-box { background:#f4f4f6; border:1px solid rgba(0,0,0,0.1); border-radius:8px; padding:6px 12px; font-size:15px; font-weight:500; color:#111; text-align:center; min-width:60px; }
+  .score-box.finished { background:#e8f5e9; border-color:#a5d6a7; }
+  .score-inputs { display:flex; align-items:center; gap:6px; }
+  .score-inputs input { width:44px; padding:8px 4px; border:1px solid rgba(0,0,0,0.15); border-radius:8px; font-size:16px; text-align:center; font-weight:500; color:#111; background:white; outline:none; }
+  .score-inputs input:focus { border-color:var(--groov-mid); }
+  .center-col { display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .btn-save-match { width:100%; margin-top:12px; padding:10px; background:var(--groov-mid); color:white; border:none; border-radius:8px; font-size:14px; font-weight:500; cursor:pointer; }
+  .saved-badge { font-size:11px; padding:3px 10px; background:#e8f5e9; color:#2e7d32; border-radius:20px; font-weight:500; }
+  .pts-badge { font-size:11px; padding:3px 10px; background:#e3f2fd; color:#1565c0; border-radius:20px; font-weight:500; }
+  .status-pill { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:500; }
+  .status-scheduled { background:#f0f0f0; color:#666; }
+  .status-finished { background:#e8f5e9; color:#2e7d32; }
+  .status-closed { background:#fff3e0; color:#e65100; }
+  .ranking-row { display:grid; grid-template-columns:32px 1fr auto; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid rgba(0,0,0,0.06); }
+  .ranking-row:last-child { border-bottom:none; }
+  .rank-num { font-size:14px; text-align:center; }
+  .rank-name { font-size:14px; font-weight:500; color:#111; }
+  .rank-you { font-size:11px; color:var(--groov-mid); font-weight:500; }
+  .rank-pts { font-size:16px; font-weight:500; color:#111; text-align:right; }
+  .rank-pts-label { font-size:11px; color:#999; text-align:right; }
+  .points-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px; }
+  .pts-item { background:#f4f4f6; border-radius:8px; padding:12px; text-align:center; }
+  .pts-num { font-size:22px; font-weight:500; color:var(--groov-mid); }
+  .pts-desc { font-size:11px; color:#888; margin-top:4px; line-height:1.4; }
+  .alert-info { background:#e8f4fd; border:1px solid #90caf9; border-radius:8px; padding:10px 14px; font-size:13px; color:#1565c0; margin-bottom:12px; }
+  .loading-text { color:#999; font-size:13px; padding:24px 0; text-align:center; }
+  .group-label { font-size:11px; font-weight:500; color:rgba(255,255,255,0.5); text-transform:uppercase; letter-spacing:0.5px; padding:10px 0 4px; }
+  .rules-list { font-size:13px; color:#666; line-height:1.9; }
+  .rules-list p::before { content:'• '; }
+  .calendar-list { font-size:13px; color:#666; line-height:2.1; }
+  .saving-bar { display:none; text-align:center; font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:8px; }
+  /* Admin panel */
+  .admin-match { display:grid; grid-template-columns:1fr auto auto auto; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid rgba(0,0,0,0.06); font-size:13px; }
+  .admin-match:last-child { border-bottom:none; }
+  .admin-input { width:38px; padding:4px; border:1px solid #ccc; border-radius:6px; text-align:center; font-size:13px; }
+  .btn-admin-save { padding:4px 10px; background:var(--groov-mid); color:white; border:none; border-radius:6px; font-size:12px; cursor:pointer; }
+  @media (max-width:480px) { body { padding:10px; } .header { padding:14px 16px 12px; } .logo-text { font-size:18px; } }
+</style>
+</head>
+<body>
+
+<div class="pitch-bg">
+  <svg viewBox="0 0 800 500" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice" style="width:100%;height:100%;opacity:0.30;">
+    <rect width="800" height="500" fill="#1a7a2e"/>
+    <rect x="0" y="0" width="80" height="500" fill="#1e8832" opacity="0.5"/>
+    <rect x="160" y="0" width="80" height="500" fill="#1e8832" opacity="0.5"/>
+    <rect x="320" y="0" width="80" height="500" fill="#1e8832" opacity="0.5"/>
+    <rect x="480" y="0" width="80" height="500" fill="#1e8832" opacity="0.5"/>
+    <rect x="640" y="0" width="80" height="500" fill="#1e8832" opacity="0.5"/>
+    <rect x="30" y="30" width="740" height="440" fill="none" stroke="white" stroke-width="3"/>
+    <line x1="400" y1="30" x2="400" y2="470" stroke="white" stroke-width="2"/>
+    <circle cx="400" cy="250" r="60" fill="none" stroke="white" stroke-width="2"/>
+    <circle cx="400" cy="250" r="4" fill="white"/>
+    <rect x="30" y="155" width="110" height="190" fill="none" stroke="white" stroke-width="2"/>
+    <rect x="30" y="205" width="50" height="90" fill="none" stroke="white" stroke-width="2"/>
+    <rect x="18" y="220" width="12" height="60" fill="none" stroke="white" stroke-width="2"/>
+    <circle cx="97" cy="250" r="3" fill="white"/>
+    <path d="M 140 210 A 60 60 0 0 1 140 290" fill="none" stroke="white" stroke-width="2"/>
+    <rect x="660" y="155" width="110" height="190" fill="none" stroke="white" stroke-width="2"/>
+    <rect x="720" y="205" width="50" height="90" fill="none" stroke="white" stroke-width="2"/>
+    <rect x="770" y="220" width="12" height="60" fill="none" stroke="white" stroke-width="2"/>
+    <circle cx="703" cy="250" r="3" fill="white"/>
+    <path d="M 660 210 A 60 60 0 0 0 660 290" fill="none" stroke="white" stroke-width="2"/>
+    <path d="M 30 50 A 20 20 0 0 1 50 30" fill="none" stroke="white" stroke-width="2"/>
+    <path d="M 750 30 A 20 20 0 0 1 770 50" fill="none" stroke="white" stroke-width="2"/>
+    <path d="M 30 450 A 20 20 0 0 0 50 470" fill="none" stroke="white" stroke-width="2"/>
+    <path d="M 770 450 A 20 20 0 0 1 750 470" fill="none" stroke="white" stroke-width="2"/>
+    <!-- 22 players -->
+    <g transform="translate(38,250)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(115,115)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(115,195)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(115,305)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(115,385)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(200,145)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(200,250)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(200,355)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(295,175)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(295,250)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(295,325)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(762,250)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(685,115)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(685,195)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(685,305)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(685,385)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(600,145)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(600,250)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(600,355)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(505,175)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(505,250)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+    <g transform="translate(505,325)" opacity="0.9">
+      <circle cx="0" cy="-15.6" r="2.64" fill="white"/>
+      <rect x="-4.2" y="-12.6" width="8.4" height="6.0" rx="1" fill="#1a1460"/>
+      <rect x="-2.4" y="-12.6" width="4.8" height="1.8" rx="0.5" fill="#00c9f0"/>
+      <rect x="-4.2" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <rect x="2.76" y="-12.6" width="1.44" height="3.6" rx="0.3" fill="#00c9f0"/>
+      <line x1="-4.2" y1="-9.6" x2="-7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="4.2" y1="-9.6" x2="7.8" y2="-4.8" stroke="white" stroke-width="1.08"/>
+      <line x1="-1.8" y1="-6.6" x2="-3.6" y2="0" stroke="white" stroke-width="1.32"/>
+      <line x1="1.8" y1="-6.6" x2="3.6" y2="0" stroke="white" stroke-width="1.32"/>
+    </g>
+  </svg>
+  <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(10,14,60,0.72) 0%,rgba(5,10,45,0.72) 100%);"></div>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div>
+      <div class="logo-text">groovin<span>ads</span></div>
+      <div class="tagline">Display your best</div>
+    </div>
+    <div class="header-right">
+      <div class="title">⚽ Desafío de pronóstico Mundial 2026</div>
+      <div class="sub" id="user-display">No registrado</div>
+    </div>
+  </div>
+
+  <div class="saving-bar" id="saving-bar">⏳ Guardando...</div>
+
+  <div class="nav">
+    <button class="active" onclick="showSection('registro')">Registro</button>
+    <button onclick="showSection('fixture')">Fixture</button>
+    <button onclick="showSection('tabla')">Tabla</button>
+    <button onclick="showSection('reglas')">Reglas</button>
+    <button onclick="showSection('admin')">Admin 🔒</button>
+  </div>
+
+  <!-- REGISTRO -->
+  <div id="registro" class="section visible">
+    <div style="background:linear-gradient(135deg,#1a1460,#2d27a0);border-radius:12px;padding:20px;margin-bottom:12px;text-align:center;">
+      <div style="font-size:22px;margin-bottom:8px;">⚽</div>
+      <div style="color:white;font-size:18px;font-weight:500;margin-bottom:6px;">Este Mundial lo vivimos juntos</div>
+      <div style="color:rgba(255,255,255,0.7);font-size:13px;">Pronosticá los 72 partidos, acertá el campeón y competí con todo el equipo de Groovinads.</div>
+    </div>
+    <div class="card" id="form-card">
+      <div class="card-title">Ingresá al desafío</div>
+      <div class="form-group">
+        <label>Nombre completo</label>
+        <input type="text" id="input-name" placeholder="Tu nombre y apellido" autocomplete="name" />
+      </div>
+      <div class="form-group">
+        <label>Email corporativo</label>
+        <input type="email" id="input-email" placeholder="nombre@groovinads.com" autocomplete="email" />
+        <div id="email-error" style="font-size:12px;color:#c62828;margin-top:4px;display:none;">Solo pueden participar emails @groovinads.com</div>
+      </div>
+      <button class="btn-primary" id="btn-register" onclick="register()">Ingresá</button>
+    </div>
+    <div class="card" id="registered-info" style="display:none;">
+      <div class="card-title">Participante registrado</div>
+      <div id="reg-summary" style="font-size:15px;color:#111;font-weight:500;margin-bottom:4px;"></div>
+      <div id="reg-email-display" style="font-size:12px;color:#888;margin-bottom:12px;"></div>
+      <button class="btn-primary" onclick="showSection('fixture')">Ver fixture y cargar pronósticos →</button>
+      <button class="btn-secondary" onclick="logout()">Cambiar usuario</button>
+    </div>
+  </div>
+
+  <!-- FIXTURE -->
+  <div id="fixture" class="section">
+    <div class="alert-info" id="fixture-alert">Registrate primero para poder cargar tus pronósticos.</div>
+    <div id="progress-bar-wrap" style="display:none;background:rgba(255,255,255,0.97);border-radius:10px;padding:12px 16px;margin-bottom:12px;border:1px solid rgba(0,0,0,0.08);display:none;align-items:center;gap:12px;">
+      <span style="font-size:13px;color:#555;white-space:nowrap;">⚽ Completaste</span>
+      <div style="flex:1;background:#eee;border-radius:20px;height:8px;overflow:hidden;min-width:60px;">
+        <div id="progress-fill" style="height:100%;background:linear-gradient(90deg,#2d27a0,#00c9f0);border-radius:20px;width:0%;transition:width 0.4s;"></div>
+      </div>
+      <span id="progress-text" style="font-size:13px;font-weight:500;color:#2d27a0;white-space:nowrap;">0/72</span>
+    </div>
+    <div id="champion-section" style="display:none;background:rgba(255,255,255,0.97);border:1px solid rgba(0,0,0,0.08);border-radius:12px;padding:14px 16px;margin-bottom:12px;">
+      <div style="font-size:12px;font-weight:500;color:#888;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">⭐ Bonus — campeón del Mundial</div>
+      <div id="champion-desc" style="font-size:13px;color:#555;margin-bottom:10px;">Elegí el campeón antes del cierre de la fase de grupos (27 de junio, 23:00 hs ARG) y sumá 10 puntos extra si acertás.</div>
+      <select id="champion-select" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:8px;font-size:14px;color:#111;background:white;margin-bottom:10px;">
+        <option value="">— Elegí el campeón —</option>
+        <option>México</option><option>Brasil</option><option>Argentina</option><option>Francia</option>
+        <option>Inglaterra</option><option>España</option><option>Portugal</option><option>Alemania</option>
+        <option>Países Bajos</option><option>Uruguay</option><option>Colombia</option><option>Estados Unidos</option>
+        <option>Marruecos</option><option>Japón</option><option>Corea del Sur</option><option>Senegal</option>
+        <option>Noruega</option><option>Bélgica</option><option>Suiza</option><option>Croacia</option>
+        <option>Turquía</option><option>Australia</option><option>Canadá</option><option>Ecuador</option>
+        <option>Suecia</option><option>Ghana</option><option>Panamá</option><option>Austria</option>
+        <option>Túnez</option><option>Argelia</option><option>Escocia</option><option>Irán</option>
+        <option>Arabia Saudita</option><option>Qatar</option><option>Cabo Verde</option><option>Nueva Zelanda</option>
+        <option>Haití</option><option>RD de Congo</option><option>Uzbekistán</option><option>Irak</option>
+        <option>Jordania</option><option>Bosnia y Herzegovina</option><option>Egipto</option>
+        <option>Curazao</option><option>Paraguay</option><option>Sudáfrica</option><option>Costa de Marfil</option>
+      </select>
+      <button onclick="saveChampion()" style="width:100%;padding:10px;background:#2d27a0;color:white;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;" id="champion-btn">Guardar mi campeón</button>
+    </div>
+    <div id="matches-container"></div>
+  </div>
+
+  <!-- TABLA -->
+  <div id="tabla" class="section">
+    <div class="card">
+      <div class="card-title">Tabla de posiciones</div>
+      <div id="ranking-container"><div class="loading-text">Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- REGLAS -->
+  <div id="reglas" class="section">
+    <div class="card">
+      <div class="card-title">Sistema de puntos</div>
+      <div class="points-grid">
+        <div class="pts-item"><div class="pts-num">3</div><div class="pts-desc">Resultado exacto (ej: 2-1)</div></div>
+        <div class="pts-item"><div class="pts-num">1</div><div class="pts-desc">Ganador o empate correcto</div></div>
+        <div class="pts-item"><div class="pts-num" style="color:#c9a227;">10</div><div class="pts-desc">Campeón del Mundial acertado ⭐</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="background:#fffbea;border:1px solid #f5d76e;border-radius:8px;padding:12px 14px;margin-bottom:12px;font-size:13px;color:#7d5a00;">
+        ⭐ <strong>Bonus especial:</strong> Elegí el campeón antes del cierre de la fase de grupos (27 de junio, 23:00 hs ARG). Si acertás, sumás 10 puntos extra. Una vez cerrada la fase de grupos no se puede modificar.
+      </div>
+      <div class="card-title">Reglas importantes</div>
+      <div class="rules-list">
+        <p>Los pronósticos se cierran automáticamente 5 minutos antes de cada partido.</p>
+        <p>La apuesta por el campeón cierra el 27 de junio a las 23:00 hs (ARG/URU/BR).</p>
+        <p>Una vez cerrado un partido, no se pueden cargar ni modificar pronósticos.</p>
+        <p>Los resultados se actualizan desde el panel de administración.</p>
+        <p>La tabla se recalcula automáticamente y en tiempo real.</p>
+        <p>Hay premios para los 3 primeros del ranking final (19 de julio).</p>
+        <p>Participación gratuita. Los premios los pone Groovinads.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Calendario</div>
+      <div class="calendar-list">
+        <p>Fase de grupos: 11 – 27 de junio</p>
+        <p>Dieciseisavos: 28 jun – 3 jul</p>
+        <p>Octavos de final: 4 – 7 de julio</p>
+        <p>Cuartos de final: 9 – 11 de julio</p>
+        <p>Semifinales: 14 y 15 de julio</p>
+        <p>Final: 19 de julio — MetLife Stadium</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="admin" class="section">
+    <div class="card" id="admin-login-card">
+      <div class="card-title">Panel de administración</div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="admin-password" placeholder="Contraseña de admin" />
+      </div>
+      <button class="btn-primary" onclick="adminLogin()">Entrar</button>
+      <div id="admin-error" style="font-size:12px;color:#c62828;margin-top:8px;display:none;">Contraseña incorrecta</div>
+    </div>
+    <div id="admin-panel" style="display:none;">
+      <div class="card">
+        <div class="card-title">Campeón del Mundial</div>
+        <div style="font-size:13px;color:#555;margin-bottom:10px;">Una vez terminada la final, ingresá el campeón para sumar los 10 pts bonus automáticamente.</div>
+        <select id="admin-champion" style="width:100%;padding:9px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:8px;font-size:14px;margin-bottom:10px;">
+          <option value="">— Campeón aún no definido —</option>
+          <option>México</option><option>Brasil</option><option>Argentina</option><option>Francia</option>
+          <option>Inglaterra</option><option>España</option><option>Portugal</option><option>Alemania</option>
+          <option>Países Bajos</option><option>Uruguay</option><option>Colombia</option><option>Estados Unidos</option>
+          <option>Marruecos</option><option>Japón</option><option>Corea del Sur</option><option>Senegal</option>
+        </select>
+        <button class="btn-primary" onclick="saveAdminChampion()">Guardar campeón y recalcular puntos</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Cargar resultados de partidos</div>
+        <div style="font-size:13px;color:#888;margin-bottom:12px;">Ingresá el resultado final de cada partido jugado.</div>
+        <div id="admin-matches"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'https://wbcadoadnygagijsuczr.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_WF3HP510QSDh3rLGDD9SZw_XGBfgLQB';
+const ADMIN_PASS = 'groovinads2026';
+const CHAMPION_DEADLINE = new Date('2026-06-28T02:00:00Z');
+
+let currentUser = null;
+let currentEmail = null;
+let currentRecord = null;
+let forecasts = {};
+
+const FLAGS = {
+  'México':'mx','Sudáfrica':'za','Corea del Sur':'kr','República Checa':'cz',
+  'Canadá':'ca','Bosnia y Herzegovina':'ba','Qatar':'qa','Suiza':'ch',
+  'Brasil':'br','Marruecos':'ma','Haití':'ht','Escocia':'gb-sct',
+  'Estados Unidos':'us','Paraguay':'py','Australia':'au','Turquía':'tr',
+  'Alemania':'de','Curazao':'cw','Costa de Marfil':'ci','Ecuador':'ec',
+  'Países Bajos':'nl','Japón':'jp','Suecia':'se','Túnez':'tn',
+  'Bélgica':'be','Egipto':'eg','Irán':'ir','Nueva Zelanda':'nz',
+  'España':'es','Cabo Verde':'cv','Arabia Saudita':'sa','Uruguay':'uy',
+  'Francia':'fr','Senegal':'sn','Irak':'iq','Noruega':'no',
+  'Argentina':'ar','Argelia':'dz','Austria':'at','Jordania':'jo',
+  'Portugal':'pt','RD de Congo':'cd','Uzbekistán':'uz','Colombia':'co',
+  'Inglaterra':'gb-eng','Croacia':'hr','Ghana':'gh','Panamá':'pa',
+};
+
+function flagImg(team) {
+  const code = FLAGS[team] || 'un';
+  return `<img class="team-flag" src="https://flagcdn.com/w40/${code}.png" alt="${team}" onerror="this.style.display='none'" />`;
+}
+
+const MATCHES = [
+  {id:1,kickoff:"2026-06-11T19:00:00Z",round:'Grupo A',home:'México',away:'Sudáfrica',score1:null,score2:null},
+  {id:2,kickoff:"2026-06-12T02:00:00Z",round:'Grupo A',home:'Corea del Sur',away:'República Checa',score1:null,score2:null},
+  {id:3,kickoff:"2026-06-12T19:00:00Z",round:'Grupo A',home:'República Checa',away:'Sudáfrica',score1:null,score2:null},
+  {id:4,kickoff:"2026-06-13T01:00:00Z",round:'Grupo A',home:'México',away:'Corea del Sur',score1:null,score2:null},
+  {id:5,kickoff:"2026-06-14T19:00:00Z",round:'Grupo A',home:'Sudáfrica',away:'Corea del Sur',score1:null,score2:null},
+  {id:6,kickoff:"2026-06-14T19:00:00Z",round:'Grupo A',home:'México',away:'República Checa',score1:null,score2:null},
+  {id:7,kickoff:"2026-06-12T19:00:00Z",round:'Grupo B',home:'Canadá',away:'Bosnia y Herzegovina',score1:null,score2:null},
+  {id:8,kickoff:"2026-06-13T19:00:00Z",round:'Grupo B',home:'Qatar',away:'Suiza',score1:null,score2:null},
+  {id:9,kickoff:"2026-06-18T19:00:00Z",round:'Grupo B',home:'Suiza',away:'Bosnia y Herzegovina',score1:null,score2:null},
+  {id:10,kickoff:"2026-06-18T22:00:00Z",round:'Grupo B',home:'Canadá',away:'Qatar',score1:null,score2:null},
+  {id:11,kickoff:"2026-06-24T19:00:00Z",round:'Grupo B',home:'Bosnia y Herzegovina',away:'Qatar',score1:null,score2:null},
+  {id:12,kickoff:"2026-06-24T19:00:00Z",round:'Grupo B',home:'Suiza',away:'Canadá',score1:null,score2:null},
+  {id:13,kickoff:"2026-06-13T22:00:00Z",round:'Grupo C',home:'Brasil',away:'Marruecos',score1:null,score2:null},
+  {id:14,kickoff:"2026-06-14T01:00:00Z",round:'Grupo C',home:'Haití',away:'Escocia',score1:null,score2:null},
+  {id:15,kickoff:"2026-06-19T22:00:00Z",round:'Grupo C',home:'Escocia',away:'Marruecos',score1:null,score2:null},
+  {id:16,kickoff:"2026-06-20T00:30:00Z",round:'Grupo C',home:'Brasil',away:'Haití',score1:null,score2:null},
+  {id:17,kickoff:"2026-06-25T19:00:00Z",round:'Grupo C',home:'Marruecos',away:'Haití',score1:null,score2:null},
+  {id:18,kickoff:"2026-06-25T19:00:00Z",round:'Grupo C',home:'Escocia',away:'Brasil',score1:null,score2:null},
+  {id:19,kickoff:"2026-06-13T01:00:00Z",round:'Grupo D',home:'Estados Unidos',away:'Paraguay',score1:null,score2:null},
+  {id:20,kickoff:"2026-06-13T04:00:00Z",round:'Grupo D',home:'Australia',away:'Turquía',score1:null,score2:null},
+  {id:21,kickoff:"2026-06-19T19:00:00Z",round:'Grupo D',home:'Estados Unidos',away:'Australia',score1:null,score2:null},
+  {id:22,kickoff:"2026-06-20T03:00:00Z",round:'Grupo D',home:'Turquía',away:'Paraguay',score1:null,score2:null},
+  {id:23,kickoff:"2026-06-25T23:00:00Z",round:'Grupo D',home:'Paraguay',away:'Australia',score1:null,score2:null},
+  {id:24,kickoff:"2026-06-25T23:00:00Z",round:'Grupo D',home:'Turquía',away:'Estados Unidos',score1:null,score2:null},
+  {id:25,kickoff:"2026-06-14T17:00:00Z",round:'Grupo E',home:'Alemania',away:'Curazao',score1:null,score2:null},
+  {id:26,kickoff:"2026-06-14T23:00:00Z",round:'Grupo E',home:'Costa de Marfil',away:'Ecuador',score1:null,score2:null},
+  {id:27,kickoff:"2026-06-20T20:00:00Z",round:'Grupo E',home:'Alemania',away:'Costa de Marfil',score1:null,score2:null},
+  {id:28,kickoff:"2026-06-21T02:00:00Z",round:'Grupo E',home:'Ecuador',away:'Curazao',score1:null,score2:null},
+  {id:29,kickoff:"2026-06-26T23:00:00Z",round:'Grupo E',home:'Curazao',away:'Costa de Marfil',score1:null,score2:null},
+  {id:30,kickoff:"2026-06-26T23:00:00Z",round:'Grupo E',home:'Ecuador',away:'Alemania',score1:null,score2:null},
+  {id:31,kickoff:"2026-06-14T20:00:00Z",round:'Grupo F',home:'Países Bajos',away:'Japón',score1:null,score2:null},
+  {id:32,kickoff:"2026-06-15T02:00:00Z",round:'Grupo F',home:'Suecia',away:'Túnez',score1:null,score2:null},
+  {id:33,kickoff:"2026-06-20T17:00:00Z",round:'Grupo F',home:'Países Bajos',away:'Suecia',score1:null,score2:null},
+  {id:34,kickoff:"2026-06-21T04:00:00Z",round:'Grupo F',home:'Túnez',away:'Japón',score1:null,score2:null},
+  {id:35,kickoff:"2026-06-27T03:00:00Z",round:'Grupo F',home:'Japón',away:'Suecia',score1:null,score2:null},
+  {id:36,kickoff:"2026-06-27T03:00:00Z",round:'Grupo F',home:'Túnez',away:'Países Bajos',score1:null,score2:null},
+  {id:37,kickoff:"2026-06-15T19:00:00Z",round:'Grupo G',home:'Bélgica',away:'Egipto',score1:null,score2:null},
+  {id:38,kickoff:"2026-06-16T01:00:00Z",round:'Grupo G',home:'Irán',away:'Nueva Zelanda',score1:null,score2:null},
+  {id:39,kickoff:"2026-06-21T19:00:00Z",round:'Grupo G',home:'Bélgica',away:'Irán',score1:null,score2:null},
+  {id:40,kickoff:"2026-06-22T01:00:00Z",round:'Grupo G',home:'Nueva Zelanda',away:'Egipto',score1:null,score2:null},
+  {id:41,kickoff:"2026-06-27T23:00:00Z",round:'Grupo G',home:'Egipto',away:'Irán',score1:null,score2:null},
+  {id:42,kickoff:"2026-06-27T23:00:00Z",round:'Grupo G',home:'Nueva Zelanda',away:'Bélgica',score1:null,score2:null},
+  {id:43,kickoff:"2026-06-15T16:00:00Z",round:'Grupo H',home:'España',away:'Cabo Verde',score1:null,score2:null},
+  {id:44,kickoff:"2026-06-15T22:00:00Z",round:'Grupo H',home:'Arabia Saudita',away:'Uruguay',score1:null,score2:null},
+  {id:45,kickoff:"2026-06-21T16:00:00Z",round:'Grupo H',home:'España',away:'Arabia Saudita',score1:null,score2:null},
+  {id:46,kickoff:"2026-06-21T22:00:00Z",round:'Grupo H',home:'Uruguay',away:'Cabo Verde',score1:null,score2:null},
+  {id:47,kickoff:"2026-06-27T03:00:00Z",round:'Grupo H',home:'Cabo Verde',away:'Arabia Saudita',score1:null,score2:null},
+  {id:48,kickoff:"2026-06-27T03:00:00Z",round:'Grupo H',home:'Uruguay',away:'España',score1:null,score2:null},
+  {id:49,kickoff:"2026-06-16T19:00:00Z",round:'Grupo I',home:'Francia',away:'Senegal',score1:null,score2:null},
+  {id:50,kickoff:"2026-06-16T22:00:00Z",round:'Grupo I',home:'Irak',away:'Noruega',score1:null,score2:null},
+  {id:51,kickoff:"2026-06-22T21:00:00Z",round:'Grupo I',home:'Francia',away:'Irak',score1:null,score2:null},
+  {id:52,kickoff:"2026-06-23T00:00:00Z",round:'Grupo I',home:'Noruega',away:'Senegal',score1:null,score2:null},
+  {id:53,kickoff:"2026-06-27T19:00:00Z",round:'Grupo I',home:'Senegal',away:'Irak',score1:null,score2:null},
+  {id:54,kickoff:"2026-06-27T19:00:00Z",round:'Grupo I',home:'Noruega',away:'Francia',score1:null,score2:null},
+  {id:55,kickoff:"2026-06-17T01:00:00Z",round:'Grupo J',home:'Argentina',away:'Argelia',score1:null,score2:null},
+  {id:56,kickoff:"2026-06-17T04:00:00Z",round:'Grupo J',home:'Austria',away:'Jordania',score1:null,score2:null},
+  {id:57,kickoff:"2026-06-22T17:00:00Z",round:'Grupo J',home:'Argentina',away:'Austria',score1:null,score2:null},
+  {id:58,kickoff:"2026-06-23T03:00:00Z",round:'Grupo J',home:'Jordania',away:'Argelia',score1:null,score2:null},
+  {id:59,kickoff:"2026-06-28T19:00:00Z",round:'Grupo J',home:'Argelia',away:'Austria',score1:null,score2:null},
+  {id:60,kickoff:"2026-06-28T19:00:00Z",round:'Grupo J',home:'Jordania',away:'Argentina',score1:null,score2:null},
+  {id:61,kickoff:"2026-06-17T17:00:00Z",round:'Grupo K',home:'Portugal',away:'RD de Congo',score1:null,score2:null},
+  {id:62,kickoff:"2026-06-18T02:00:00Z",round:'Grupo K',home:'Uzbekistán',away:'Colombia',score1:null,score2:null},
+  {id:63,kickoff:"2026-06-23T17:00:00Z",round:'Grupo K',home:'Portugal',away:'Uzbekistán',score1:null,score2:null},
+  {id:64,kickoff:"2026-06-24T02:00:00Z",round:'Grupo K',home:'Colombia',away:'RD de Congo',score1:null,score2:null},
+  {id:65,kickoff:"2026-06-28T23:00:00Z",round:'Grupo K',home:'RD de Congo',away:'Uzbekistán',score1:null,score2:null},
+  {id:66,kickoff:"2026-06-28T23:00:00Z",round:'Grupo K',home:'Colombia',away:'Portugal',score1:null,score2:null},
+  {id:67,kickoff:"2026-06-17T20:00:00Z",round:'Grupo L',home:'Inglaterra',away:'Croacia',score1:null,score2:null},
+  {id:68,kickoff:"2026-06-17T23:00:00Z",round:'Grupo L',home:'Ghana',away:'Panamá',score1:null,score2:null},
+  {id:69,kickoff:"2026-06-23T20:00:00Z",round:'Grupo L',home:'Inglaterra',away:'Ghana',score1:null,score2:null},
+  {id:70,kickoff:"2026-06-23T23:00:00Z",round:'Grupo L',home:'Panamá',away:'Croacia',score1:null,score2:null},
+  {id:71,kickoff:"2026-06-29T03:00:00Z",round:'Grupo L',home:'Croacia',away:'Ghana',score1:null,score2:null},
+  {id:72,kickoff:"2026-06-29T03:00:00Z",round:'Grupo L',home:'Panamá',away:'Inglaterra',score1:null,score2:null},
+];
+
+// ─── SUPABASE HELPERS ─────────────────────────────────────
+async function sbGet(email) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/participants?email=eq.${encodeURIComponent(email)}&select=*`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  const data = await res.json();
+  return data[0] || null;
+}
+
+async function sbGetAll() {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/participants?select=*&order=pts.desc`, {
+    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+  });
+  return await res.json();
+}
+
+async function sbUpsert(record) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/participants`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'resolution=merge-duplicates,return=representation'
+    },
+    body: JSON.stringify(record)
+  });
+  const data = await res.json();
+  return Array.isArray(data) ? data[0] : data;
+}
+
+async function sbUpdateAll(rows) {
+  for (const row of rows) {
+    await fetch(`${SUPABASE_URL}/rest/v1/participants?email=eq.${encodeURIComponent(row.email)}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ pts: row.pts })
+    });
+  }
+}
+
+// ─── HELPERS ──────────────────────────────────────────────
+function showSaving(show) {
+  const el = document.getElementById('saving-bar');
+  if (el) el.style.display = show ? 'block' : 'none';
+}
+
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById(name).classList.add('visible');
+  const idx = ['registro','fixture','tabla','reglas','admin'].indexOf(name);
+  document.querySelectorAll('.nav button')[idx].classList.add('active');
+  if (name === 'fixture') renderMatches();
+  if (name === 'tabla') renderRanking();
+  if (name === 'admin') renderAdminMatches();
+}
+
+function kickoffARG(iso) {
+  if (!iso) return '--:--';
+  const d = new Date(iso);
+  const h = (d.getUTCHours() - 3 + 24) % 24;
+  const m = d.getUTCMinutes();
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+function kickoffMX(iso) {
+  if (!iso) return '--:--';
+  const d = new Date(iso);
+  const h = (d.getUTCHours() - 6 + 24) % 24;
+  const m = d.getUTCMinutes();
+  return String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0');
+}
+function kickoffDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const days = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const months = ['enero','febrero','marzo','abril','mayo','junio','julio'];
+  const local = new Date(d.getTime() - 3*3600*1000);
+  return `${days[local.getUTCDay()]} ${local.getUTCDate()} de ${months[local.getUTCMonth()]}`;
+}
+
+function isMatchOpen(m) {
+  if (m.score1 !== null && m.score1 !== undefined) return false;
+  if (!m.kickoff) return true;
+  const cutoff = new Date(new Date(m.kickoff).getTime() - 5*60*1000);
+  return new Date() < cutoff;
+}
+function isChampionOpen() {
+  return new Date() < CHAMPION_DEADLINE;
+}
+
+function calcPts(fs1, fs2, rs1, rs2) {
+  if (rs1 === null || rs1 === undefined) return 0;
+  if (Number(fs1) === Number(rs1) && Number(fs2) === Number(rs2)) return 3;
+  const fR = fs1 > fs2 ? 'H' : fs1 < fs2 ? 'A' : 'D';
+  const rR = rs1 > rs2 ? 'H' : rs1 < rs2 ? 'A' : 'D';
+  return fR === rR ? 1 : 0;
+}
+
+function calcTotalPts(fc, championWinner) {
+  let total = 0;
+  MATCHES.forEach(m => {
+    const f = fc[String(m.id)];
+    if (f && m.score1 !== null && m.score1 !== undefined) total += calcPts(f.s1, f.s2, m.score1, m.score2);
+  });
+  return total;
+}
+
+// ─── AUTH ─────────────────────────────────────────────────
+async function register() {
+  const name = document.getElementById('input-name').value.trim();
+  const email = document.getElementById('input-email').value.trim().toLowerCase();
+  const errEl = document.getElementById('email-error');
+  if (!name || !email) return;
+  if (!email.endsWith('@groovinads.com')) { errEl.style.display='block'; return; }
+  errEl.style.display='none';
+  const btn = document.getElementById('btn-register');
+  btn.textContent='Cargando...'; btn.disabled=true;
+  showSaving(true);
+  let record = await sbGet(email);
+  if (!record) {
+    record = await sbUpsert({ email, name, pts: 0, forecasts: {}, champion: null });
+  }
+  showSaving(false);
+  currentUser = record.name;
+  currentEmail = record.email;
+  currentRecord = record;
+  forecasts = record.forecasts || {};
+  localStorage.setItem('gv_user', currentUser);
+  localStorage.setItem('gv_email', currentEmail);
+  showLoggedIn();
+  btn.textContent='Ingresá'; btn.disabled=false;
+}
+
+function logout() {
+  currentUser=null; currentEmail=null; currentRecord=null; forecasts={};
+  localStorage.removeItem('gv_user'); localStorage.removeItem('gv_email');
+  document.getElementById('user-display').textContent='No registrado';
+  document.getElementById('form-card').style.display='block';
+  document.getElementById('registered-info').style.display='none';
+  document.getElementById('fixture-alert').style.display='block';
+  document.getElementById('champion-section').style.display='none';
+  document.getElementById('progress-bar-wrap').style.display='none';
+  document.getElementById('input-name').value='';
+  document.getElementById('input-email').value='';
+  showSection('registro');
+}
+
+function showLoggedIn() {
+  document.getElementById('user-display').textContent=currentUser;
+  document.getElementById('reg-summary').textContent=currentUser;
+  document.getElementById('reg-email-display').textContent=currentEmail;
+  document.getElementById('form-card').style.display='none';
+  document.getElementById('registered-info').style.display='block';
+  document.getElementById('fixture-alert').style.display='none';
+  document.getElementById('champion-section').style.display='block';
+  document.getElementById('progress-bar-wrap').style.display='flex';
+  // Restore champion
+  const champ = currentRecord && currentRecord.champion;
+  const btn = document.getElementById('champion-btn');
+  const sel = document.getElementById('champion-select');
+  const desc = document.getElementById('champion-desc');
+  if (champ) {
+    if (btn) { btn.textContent='✓ '+champ+' — campeón elegido'; btn.style.background='#1b5e20'; }
+    if (sel) sel.value=champ;
+  }
+  if (!isChampionOpen()) {
+    if (sel) sel.disabled=true;
+    if (btn && !champ) { btn.textContent='Apuesta cerrada'; btn.disabled=true; btn.style.background='#999'; }
+    if (btn && champ) { btn.disabled=true; }
+    if (desc) desc.innerHTML='<span style="color:#c62828;">⏱ La apuesta por el campeón está cerrada (fase de grupos finalizada).</span>';
+  }
+  updateProgress();
+}
+
+// ─── CHAMPION ─────────────────────────────────────────────
+async function saveChampion() {
+  if (!isChampionOpen() || !currentEmail) return;
+  const sel = document.getElementById('champion-select').value;
+  if (!sel) return;
+  showSaving(true);
+  await sbUpsert({ email: currentEmail, name: currentUser, champion: sel, pts: currentRecord?.pts || 0, forecasts });
+  if (currentRecord) currentRecord.champion = sel;
+  showSaving(false);
+  const btn = document.getElementById('champion-btn');
+  btn.textContent='✓ '+sel+' — campeón elegido'; btn.style.background='#1b5e20';
+}
+
+// ─── FORECASTS ────────────────────────────────────────────
+async function saveForecast(key) {
+  const s1 = parseInt(document.getElementById('f1-'+key).value);
+  const s2 = parseInt(document.getElementById('f2-'+key).value);
+  if (isNaN(s1)||isNaN(s2)) return;
+  forecasts[key] = {s1,s2,saved:true};
+  const pts = calcTotalPts(forecasts);
+  showSaving(true);
+  await sbUpsert({ email: currentEmail, name: currentUser, forecasts, pts, champion: currentRecord?.champion || null });
+  if (currentRecord) { currentRecord.forecasts = forecasts; currentRecord.pts = pts; }
+  showSaving(false);
+  updateProgress();
+  renderMatches();
+}
+
+function updateProgress() {
+  const open = MATCHES.filter(m => m.score1 === null || m.score1 === undefined);
+  const done = open.filter(m => forecasts[String(m.id)]?.saved).length;
+  const total = MATCHES.length;
+  const fill = document.getElementById('progress-fill');
+  const text = document.getElementById('progress-text');
+  if (fill) fill.style.width = Math.round((done/total)*100)+'%';
+  if (text) text.textContent = done+'/'+total;
+}
+
+// ─── RENDER MATCHES ───────────────────────────────────────
+function renderMatches() {
+  const container = document.getElementById('matches-container');
+  const byRound = {};
+  MATCHES.forEach(m => { if (!byRound[m.round]) byRound[m.round]=[]; byRound[m.round].push(m); });
+  let html = '';
+  Object.entries(byRound).forEach(([round, matches]) => {
+    html += `<div class="group-label">${round}</div>`;
+    matches.forEach(m => {
+      const key = String(m.id);
+      const fc = forecasts[key] || {};
+      const isFinished = m.score1 !== null && m.score1 !== undefined;
+      const open = isMatchOpen(m);
+      const dateStr = kickoffDate(m.kickoff);
+      const statusPill = isFinished
+        ? `<span class="status-pill status-finished">Finalizado</span>`
+        : open ? `<span class="status-pill status-scheduled">${dateStr}</span>`
+                : `<span class="status-pill status-closed">Cerrado</span>`;
+      const timesHtml = `<div class="match-times">AR | UY | BR ${kickoffARG(m.kickoff)} hs &nbsp;·&nbsp; MX ${kickoffMX(m.kickoff)} hs</div>`;
+      let centerCol = '';
+      if (isFinished) {
+        const pts = fc.s1 !== undefined ? calcPts(fc.s1,fc.s2,m.score1,m.score2) : null;
+        centerCol = `<div class="center-col">
+          <div class="score-box finished">${m.score1} – ${m.score2}</div>
+          ${fc.s1!==undefined ? `<div style="font-size:11px;color:#888;">Tu pronóstico: ${fc.s1}–${fc.s2} ${pts>0?`<span style='color:#1565c0;font-weight:500;'>+${pts}pts</span>`:''}</div>` : ''}
+        </div>`;
+      } else if (currentUser && open) {
+        centerCol = `<div class="center-col">
+          <div class="score-inputs">
+            <input type="number" min="0" max="20" value="${fc.s1!==undefined?fc.s1:''}" placeholder="0" id="f1-${key}" />
+            <span style="font-size:16px;color:#aaa;">–</span>
+            <input type="number" min="0" max="20" value="${fc.s2!==undefined?fc.s2:''}" placeholder="0" id="f2-${key}" />
+          </div>
+          ${fc.saved ? `<span class="saved-badge">✓ Guardado</span>` : ''}
+        </div>`;
+      } else {
+        centerCol = `<div class="center-col"><div class="score-box">vs</div></div>`;
+      }
+      const saveBtn = currentUser && open ? `<button class="btn-save-match" onclick="saveForecast('${key}')">Guardar pronóstico</button>` : '';
+      html += `<div class="match-card">
+        <div class="match-header">${statusPill}</div>
+        ${timesHtml}
+        <div class="match-teams">
+          <div class="team">${flagImg(m.home)}<div class="team-name">${m.home}</div></div>
+          ${centerCol}
+          <div class="team away">${flagImg(m.away)}<div class="team-name">${m.away}</div></div>
+        </div>
+        ${saveBtn}
+      </div>`;
+    });
+  });
+  container.innerHTML = html;
+}
+
+// ─── RANKING ──────────────────────────────────────────────
+async function renderRanking() {
+  const container = document.getElementById('ranking-container');
+  container.innerHTML = '<div class="loading-text">Cargando tabla...</div>';
+  const rows = await sbGetAll();
+  if (!rows.length) { container.innerHTML='<div class="loading-text">Todavía no hay participantes registrados.</div>'; return; }
+  const medals = ['🥇','🥈','🥉'];
+  let html = '';
+  rows.forEach((p, i) => {
+    const isYou = currentEmail && p.email === currentEmail;
+    html += `<div class="ranking-row" style="${isYou?'background:#f0f4ff;border-radius:8px;padding:10px 8px;margin:0 -8px;':''}">
+      <div class="rank-num">${i<3?medals[i]:(i+1)}</div>
+      <div><div class="rank-name">${p.name}</div>${isYou?'<div class="rank-you">Vos</div>':''}</div>
+      <div><div class="rank-pts">${p.pts}</div><div class="rank-pts-label">pts</div></div>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+// ─── ADMIN ────────────────────────────────────────────────
+function adminLogin() {
+  const pwd = document.getElementById('admin-password').value;
+  if (pwd !== ADMIN_PASS) { document.getElementById('admin-error').style.display='block'; return; }
+  document.getElementById('admin-login-card').style.display='none';
+  document.getElementById('admin-panel').style.display='block';
+  renderAdminMatches();
+}
+
+function renderAdminMatches() {
+  const container = document.getElementById('admin-matches');
+  if (!container) return;
+  let html = '';
+  MATCHES.forEach(m => {
+    const s1 = m.score1 !== null && m.score1 !== undefined ? m.score1 : '';
+    const s2 = m.score2 !== null && m.score2 !== undefined ? m.score2 : '';
+    html += `<div class="admin-match">
+      <span style="font-size:12px;">${m.home} vs ${m.away}<br><span style="color:#aaa;font-size:11px;">${kickoffDate(m.kickoff)}</span></span>
+      <input class="admin-input" id="as1-${m.id}" type="number" min="0" max="20" value="${s1}" placeholder="–" />
+      <input class="admin-input" id="as2-${m.id}" type="number" min="0" max="20" value="${s2}" placeholder="–" />
+      <button class="btn-admin-save" onclick="saveAdminResult(${m.id})">OK</button>
+    </div>`;
+  });
+  container.innerHTML = html;
+}
+
+async function saveAdminResult(matchId) {
+  const s1 = parseInt(document.getElementById('as1-'+matchId).value);
+  const s2 = parseInt(document.getElementById('as2-'+matchId).value);
+  if (isNaN(s1)||isNaN(s2)) return;
+  const m = MATCHES.find(x => x.id === matchId);
+  if (!m) return;
+  m.score1 = s1; m.score2 = s2;
+  // Recalculate pts for ALL participants
+  showSaving(true);
+  const allRows = await sbGetAll();
+  for (const row of allRows) {
+    const fc = row.forecasts || {};
+    const pts = calcTotalPts(fc);
+    await fetch(`${SUPABASE_URL}/rest/v1/participants?email=eq.${encodeURIComponent(row.email)}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pts })
+    });
+  }
+  showSaving(false);
+  alert(`Resultado guardado: ${m.home} ${s1}–${s2} ${m.away}. Puntos recalculados para todos.`);
+  renderMatches();
+}
+
+async function saveAdminChampion() {
+  const winner = document.getElementById('admin-champion').value;
+  if (!winner) return;
+  showSaving(true);
+  const allRows = await sbGetAll();
+  for (const row of allRows) {
+    const fc = row.forecasts || {};
+    let pts = calcTotalPts(fc);
+    if (row.champion === winner) pts += 10;
+    await fetch(`${SUPABASE_URL}/rest/v1/participants?email=eq.${encodeURIComponent(row.email)}`, {
+      method: 'PATCH',
+      headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pts })
+    });
+  }
+  showSaving(false);
+  alert(`Campeón ${winner} guardado. +10 pts sumados a quienes lo eligieron.`);
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+(async function init() {
+  const savedName = localStorage.getItem('gv_user');
+  const savedEmail = localStorage.getItem('gv_email');
+  if (savedName && savedEmail) {
+    showSaving(true);
+    const record = await sbGet(savedEmail);
+    showSaving(false);
+    if (record) {
+      currentUser = record.name;
+      currentEmail = record.email;
+      currentRecord = record;
+      forecasts = record.forecasts || {};
+      showLoggedIn();
+    }
+  }
+  renderMatches();
+})();
+</script>
+</body>
+</html>
