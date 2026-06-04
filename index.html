@@ -2,6 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <title>Desafío de pronóstico Mundial 2026 — Groovinads</title>
 <style>
@@ -530,6 +533,7 @@ let currentUser = null;
 let currentEmail = null;
 let currentRecord = null;
 let forecasts = {};
+let editingMatch = {};
 
 const FLAGS = {
   'México':'mx','Sudáfrica':'za','Corea del Sur':'kr','República Checa':'cz',
@@ -834,6 +838,11 @@ async function saveChampion() {
 }
 
 // ─── FORECASTS ────────────────────────────────────────────
+function editForecast(key) {
+  editingMatch[key] = true;
+  renderMatches();
+}
+
 async function saveForecast(key) {
   const s1 = parseInt(document.getElementById('f1-'+key).value);
   const s2 = parseInt(document.getElementById('f2-'+key).value);
@@ -885,8 +894,8 @@ function renderMatches() {
           ${fc.s1!==undefined ? `<div style="font-size:11px;color:#888;">Tu pronóstico: ${fc.s1}–${fc.s2} ${pts>0?`<span style='color:#1565c0;font-weight:500;'>+${pts}pts</span>`:''}</div>` : ''}
         </div>`;
       } else if (currentUser && open) {
-        if (fc.saved) {
-          // Already saved - show fixed score, not editable
+        if (fc.saved && !editingMatch[key]) {
+          // Already saved - show fixed score with edit button
           centerCol = `<div class="center-col">
             <div class="score-box" style="background:#e8f4fd;border-color:#90caf9;font-size:18px;font-weight:600;">${fc.s1} – ${fc.s2}</div>
             <span class="saved-badge" style="margin-top:4px;">✓ Pronóstico guardado</span>
@@ -903,7 +912,14 @@ function renderMatches() {
       } else {
         centerCol = `<div class="center-col"><div class="score-box">vs</div></div>`;
       }
-      const saveBtn = currentUser && open && !fc.saved ? `<button class="btn-save-match" onclick="saveForecast('${key}')">Guardar pronóstico</button>` : '';
+      let saveBtn = '';
+      if (currentUser && open) {
+        if (fc.saved && !editingMatch[key]) {
+          saveBtn = `<button class="btn-save-match" style="background:#555;" onclick="editForecast('${key}')">✏️ Editar pronóstico</button>`;
+        } else {
+          saveBtn = `<button class="btn-save-match" onclick="saveForecast('${key}')">Guardar pronóstico</button>`;
+        }
+      }
       html += `<div class="match-card">
         <div class="match-header">${statusPill}</div>
         ${timesHtml}
