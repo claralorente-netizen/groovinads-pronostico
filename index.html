@@ -643,18 +643,33 @@ async function sbGetAll() {
 }
 
 async function sbUpsert(record) {
-  const res = await fetch(`${SUPABASE_URL}/rest/v1/participants`, {
+  // Try update first, then insert if not exists
+  const updateRes = await fetch(`${SUPABASE_URL}/rest/v1/participants?email=eq.${encodeURIComponent(record.email)}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=representation'
+    },
+    body: JSON.stringify(record)
+  });
+  const updateData = await updateRes.json();
+  if (Array.isArray(updateData) && updateData.length > 0) return updateData[0];
+  
+  // Not found, insert
+  const insertRes = await fetch(`${SUPABASE_URL}/rest/v1/participants`, {
     method: 'POST',
     headers: {
       'apikey': SUPABASE_KEY,
       'Authorization': `Bearer ${SUPABASE_KEY}`,
       'Content-Type': 'application/json',
-      'Prefer': 'resolution=merge-duplicates,return=representation'
+      'Prefer': 'return=representation'
     },
     body: JSON.stringify(record)
   });
-  const data = await res.json();
-  return Array.isArray(data) ? data[0] : data;
+  const insertData = await insertRes.json();
+  return Array.isArray(insertData) ? insertData[0] : insertData;
 }
 
 async function sbUpdateAll(rows) {
