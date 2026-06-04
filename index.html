@@ -870,18 +870,25 @@ function renderMatches() {
           ${fc.s1!==undefined ? `<div style="font-size:11px;color:#888;">Tu pronóstico: ${fc.s1}–${fc.s2} ${pts>0?`<span style='color:#1565c0;font-weight:500;'>+${pts}pts</span>`:''}</div>` : ''}
         </div>`;
       } else if (currentUser && open) {
-        centerCol = `<div class="center-col">
-          <div class="score-inputs">
-            <input type="number" min="0" max="20" value="${fc.s1!==undefined?fc.s1:''}" placeholder="0" id="f1-${key}" />
-            <span style="font-size:16px;color:#aaa;">–</span>
-            <input type="number" min="0" max="20" value="${fc.s2!==undefined?fc.s2:''}" placeholder="0" id="f2-${key}" />
-          </div>
-          ${fc.saved ? `<span class="saved-badge">✓ Guardado</span>` : ''}
-        </div>`;
+        if (fc.saved) {
+          // Already saved - show fixed score, not editable
+          centerCol = `<div class="center-col">
+            <div class="score-box" style="background:#e8f4fd;border-color:#90caf9;font-size:18px;font-weight:600;">${fc.s1} – ${fc.s2}</div>
+            <span class="saved-badge" style="margin-top:4px;">✓ Pronóstico guardado</span>
+          </div>`;
+        } else {
+          centerCol = `<div class="center-col">
+            <div class="score-inputs">
+              <input type="number" min="0" max="20" value="${fc.s1!==undefined?fc.s1:''}" placeholder="0" id="f1-${key}" />
+              <span style="font-size:16px;color:#aaa;">–</span>
+              <input type="number" min="0" max="20" value="${fc.s2!==undefined?fc.s2:''}" placeholder="0" id="f2-${key}" />
+            </div>
+          </div>`;
+        }
       } else {
         centerCol = `<div class="center-col"><div class="score-box">vs</div></div>`;
       }
-      const saveBtn = currentUser && open ? `<button class="btn-save-match" onclick="saveForecast('${key}')">Guardar pronóstico</button>` : '';
+      const saveBtn = currentUser && open && !fc.saved ? `<button class="btn-save-match" onclick="saveForecast('${key}')">Guardar pronóstico</button>` : '';
       html += `<div class="match-card">
         <div class="match-header">${statusPill}</div>
         ${timesHtml}
